@@ -9,7 +9,7 @@ import scipy, pylab
 
 
 def main():
-
+    
     st.header("Audio File Plotter")
     st.write("Upload your audiofiles and create spectrograms and Welch diagrams.")
     audio_files = st.file_uploader(
@@ -44,11 +44,13 @@ def main():
             st.empty()
         )
 
-        common_rms = plt.figure(figsize=(10, 5))
+        common_rms = plt.figure(figsize=(15, 8))
         
-        plt.xlabel('Window / Time')
-        plt.ylabel('RMS Energy')
-        plt.yscale('linear')
+        plt.xlabel('Window / Time', fontsize=20)
+        plt.ylabel('RMS Energy', fontsize=20)
+        plt.yscale('linear', fontsize=20)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
         common_rms_container = (
             st.empty()
         )
@@ -79,21 +81,23 @@ def main():
 
                 if plot == "Yes":
                     st.write("Sound pressure level:")
-                    soundpressure = plt.figure(figsize=(15, 5))
+                    soundpressure = plt.figure(figsize=(12, 4))
                     plt.title(audio_file.name)
-                    plt.plot(t, y)
-                    plt.xlabel("time in seconds")
+                    plt.plot(t, y, linewidth = 0.5)
+                    plt.xlabel("time [s]")
                     plt.ylabel("amplitude")
                     st.pyplot(soundpressure)
 
                     st.write("RMS")
                     S, phase = librosa.magphase(librosa.stft(y))
-                    rms_x = librosa.feature.rms(y=y, frame_length=256, hop_length=512)
+                    rms_x = librosa.feature.rms(y=y, frame_length=2048, hop_length=1024)
                     rms = plt.figure(figsize=(10, 5))
-                    plt.semilogy(rms_x.T, label= f'{audio_file.name}')
-                    plt.xlabel('Window / Time')
-                    plt.ylabel('RMS Energy')
+                    plt.semilogy(rms_x.T, label= f'{audio_file.name}', linewidth = 1)
+                    plt.xlabel('Window / Time', fontsize=20)
+                    plt.ylabel('RMS Energy', fontsize=20)
                     plt.yscale('linear')
+                    plt.xticks(fontsize=20)
+                    plt.yticks(fontsize=20)
                     st.pyplot(rms)
 
                     plt.figure(common_rms.number)
@@ -107,14 +111,17 @@ def main():
                     #noverlaps = npersegsspectro / 2
                     noverlaps = 256
                     plt.specgram(
-                        y, Fs=sr, scale="dB", NFFT=512, noverlap=noverlaps
+                        y, Fs=sr, scale="dB", NFFT=1024, noverlap=noverlaps
                     )
                     plt.ylim(1, 20000)
                     plt.yscale("log")
+                    plt.xticks(fontsize=20)
+                    plt.yticks(fontsize=20)
+                
                     #plt.colorbar(format="%+2.0f dB")
-                    plt.title("Spectrogram 500Hz")
-                    plt.xlabel("Time")
-                    plt.ylabel("Frequency")
+                    plt.title("Spectrogram", fontsize=20)
+                    plt.xlabel("Time", fontsize=20)
+                    plt.ylabel("Frequency", fontsize=20)
                     st.pyplot(spectrogram)
                    
 
@@ -124,11 +131,11 @@ def main():
                     f, Pxx_den = signal.welch(
                         y,
                         sr,
-                        nperseg=2048,
+                        nperseg=4096,
                         return_onesided=True,
                         scaling="density",
                     )
-                    plt.semilogy(f, Pxx_den)
+                    plt.semilogy(f, Pxx_den, linewidth = 1)
                     plt.grid(True)
                     plt.xscale("log")
                     plt.xlabel("frequency [Hz]")
@@ -137,7 +144,7 @@ def main():
 
                     # Plot into common plot.
                     plt.figure(common_welch.number)
-                    plt.semilogy(f, Pxx_den, label=audio_file.name)
+                    plt.semilogy(f, Pxx_den, label=audio_file.name, linewidth = 1)
 
         plt.figure(common_welch.number)
         plt.legend()

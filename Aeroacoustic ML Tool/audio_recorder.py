@@ -38,7 +38,6 @@ def G1_withoutprint(x_pos, y_pos, z_pos, speed):
 #####Worker=Timestampgenerator & Karl I Ansteuerung
 def worker(temppath):
     temp = temppath #temporären Übergabepfad nutzen
-    #temp = r"C:\Users\heiko\Downloads\WPy64-3680\notebooks\gcode_projektarbeit"
     json_array = {} #json array to save important information
     startms = int(round(time.time() * 1000)) #start time of operation in ms #####MIGHT BE BETTER IN GCODE GENERATION
     lastms = startms
@@ -51,7 +50,7 @@ def worker(temppath):
         gcode_array = my_file.readlines()
 
     #read G-Code waiter from temporary file
-    #quasi prepare for "ok"s to expect from printer to stream gcode without error
+    #prepare for "ok"s to expect from printer to stream gcode without error
     gcode_waiter_array_positon = 0 #flag to store where we are in the gcode_waiter_array right now
     gcode_waiter_array = [] #file to array
     temp_gcode_waiter_file = []
@@ -171,10 +170,14 @@ def main():
         "Silvent MJ5",
         "",
     )
-    loaded_microphones = ("Renkforce UM-80 USB-Mikrofon", "other")
+    
     loaded_recording_modes = ("Recording by time", "Recording on Karl I")
 
     # selectable audio recording settings:
+    loaded_microphones = (
+        "RØDE Microphones VideoMic",
+        "Renkforce UM-80 USB-Mikrofon",
+        "other")
     loaded_sampling_rates = ("44100", "48000", "88200", "96000")
     loaded_sample_formats = ("16", "24")
     loaded_chunks = ("1024", "2048")
@@ -206,7 +209,7 @@ def main():
     
     # test_recording_mode = st.selectbox("Recording mode", loaded_recording_modes)
     
-    st.header("G-Code Settings and Recording Time")
+    st.header("Recording Mode, Recording Time and G-Code Settings")
     
     test_recording_mode = st.radio("Recording mode", loaded_recording_modes)
     
@@ -248,7 +251,7 @@ def main():
             value=25.00,
         )
         test_measuring_path = col_mode_2.number_input(
-            "Measuring Path (a) [mm]",
+            "Measuring Path (l) [mm]",
             step=0.01,
             min_value=0.01,
             max_value=1000.00,
@@ -272,7 +275,7 @@ def main():
         # Strecke, die während Beschleunigungsphase auf Vorschubgeschwindigkeit zurückgelegt wird.
         sa = 0.5 * acs * (ta ** 2)
         # Bei den Versatzwegen wird die Sollvorschubgeschwindigkeit in der Regel nicht erreicht, daher dieser Ausnahmefall:
-        if sa <= (0.5 * ss_o):
+        if sa >= (0.5 * ss_o):
             tv_o = 0  # Keine Zeit beim Versatz wird dann mit der Sollvorschubgeschwindigkeit zurückgelegt
             # Die Zeit, die für das Zurücklegen des halben Versatzes mit der Beschleunigung zurückgelegt wird
             ta_o = (ss_o / acs) ** 0.5
@@ -493,8 +496,9 @@ def main():
             samples, sample_rate, nperseg=npersegs, noverlap=noverlaps
         )
 
-        st.write("Spectrogram logarithmic scaling")
-        temporary_spectrogram_fig = plt.figure()
+        col_rec_a, col_rec_b = st.beta_columns((8,4))
+        col_rec_a.write("Spectrogram logarithmic scaling")
+        temporary_spectrogram_fig = plt.figure(figsize=[14,7])
         # creating the spectogram from the arrays of times, frequencies and spectrogram where amplitudes are expressed as colours
         plt.pcolormesh(times, frequencies, spectrogram)
         # setting the scale of the frequencies axis from 1 to 20000Hz
@@ -506,16 +510,16 @@ def main():
         plt.xlabel("Time [sec]")
         # plt.z
         # visualization of the spectrogram on Streamlit
-        st.pyplot(temporary_spectrogram_fig)
+        col_rec_a.pyplot(temporary_spectrogram_fig)
 
         if test_recording_mode == "Recording by time":
             # opening the last recorded wav file in a player on Streamlit
-            st.audio(
+            col_rec_a.audio(
                 f"audio-files/{mode_path_name}/0_temporary_files/temporary_file.wav",
                 format="audio/wav",
             )
         elif test_recording_mode == "Recording on Karl I":
-            st.audio(
+            col_rec_a.audio(
                 f"audio-files/{mode_path_name}/0_temporary_files/temporary_file.wav",
                 format="audio/wav",
             )

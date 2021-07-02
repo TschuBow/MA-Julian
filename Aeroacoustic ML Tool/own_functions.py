@@ -6,6 +6,7 @@ import math
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
@@ -16,7 +17,73 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
+from htbuilder import HtmlElement, div, ul, li, br, hr, a, p, img, styles, classes, fonts
+from htbuilder.units import percent, px
+from htbuilder.funcs import rgba, rgb
 
+
+
+def link(link, text, **style):
+    return a(_href=link, _target="_blank", style=styles(**style))(text)
+
+
+def layout(*args):
+
+    style = """
+    <style>
+      # MainMenu {visibility: hidden;}
+      footer {visibility: hidden;}
+     .stApp { bottom: 50px; }
+    </style>
+    """
+
+    style_div = styles(
+        position="fixed",
+        left=0,
+        bottom=0,
+        margin=px(0, 0, 0, 0),
+        width=percent(100),
+        color="black",
+        text_align="center",
+        height="auto",
+        opacity=1
+    )
+
+    style_hr = styles(
+        display="block",
+        margin=px(0, 8, "auto", "auto"),
+        border_style="inset",
+        border_width=px(2)
+    )
+
+    body = p()
+    foot = div(
+        style=style_div
+    )(
+        # hr(
+        #     style=style_hr
+        # ),
+        body
+    )
+
+    st.markdown(style, unsafe_allow_html=True)
+
+    for arg in args:
+        if isinstance(arg, str):
+            body(arg)
+
+        elif isinstance(arg, HtmlElement):
+            body(arg)
+
+    st.markdown(str(foot), unsafe_allow_html=True)
+
+
+def footer():
+    myargs = [
+        "Made in Streamlit by ",
+        link("https://github.com/TschuBow", "Julian Bormann"),
+    ]
+    layout(*myargs)
 
 
 
@@ -98,14 +165,15 @@ def get_frequency_ranges(sr, frequency_range):
 # FUNCTIONS FOR FEATURE REGRESSOR
 
 def add_parameter_ui(clf_name):
+    col1, col2, col3 = st.beta_columns((4,1,1))
     params = dict()
     if clf_name == "Linear Regression":
         None
     elif clf_name == "Polynomial Regression":
-        degree=st.number_input("Set Polynomial Degree", 1, 10, 2, 1)
+        degree=col1.number_input("Set Polynomial Degree", 1, 10, 2, 1)
         params["degree"] = degree
     elif clf_name == "KNN":
-        K = st.slider("K", 1 , 15)
+        K = col1.slider("K", 1 , 15)
         params["K"] = K
     elif clf_name == "SVM":
         C = st.slider("C", 0.01, 10.00)
@@ -123,7 +191,7 @@ def get_classifier(clf_name, params):
     elif clf_name == "Polynomial Regression":
         clf = make_pipeline(PolynomialFeatures(degree= params["degree"]), Ridge())
     elif clf_name == "KNN":
-        clf = KNeighborsClassifier(n_neighbors=params["K"])
+        clf = KNeighborsRegressor(n_neighbors=params["K"])
     elif clf_name == "SVM":
         clf = SVC(C=params["C"])
     elif clf_name == "Random Forrest":
